@@ -1,7 +1,8 @@
 {
-  "name": "silican-date",
+  "name": "@5am-works/silican-date",
   "version": "0.1.0",
-  "description": "",
+  "description": "Reference library for Silican dates",
+  "main": "silican.ts",
   "scripts": {
     "test": "jest"
   },
