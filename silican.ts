@@ -1,71 +1,69 @@
+const syncPoint = Date.UTC(2018, 0, 1);
+const syncDayNumber =
+   12017 * 364 +
+   7 *
+      (Math.floor(12017 / 5) -
+         Math.floor(12017 / 40) +
+         Math.floor(12017 / 400));
+const daysIn400Years = 400 * 364 + 7 * (400 / 5 - 400 / 40 + 1);
+const daysIn40Years = 40 * 364 + 7 * (40 / 5 - 1);
+const daysIn5Years = 5 * 364 + 7;
+
 export class SilicanDate {
-	public static readonly SyncPoint = Date.UTC(2018, 0, 1, 0, 0, 0, 0);
-	public static readonly MonthNames = [null, "Alandia", "Chloeon", "Espria", "Fayerion",
-		"Glacia", "Helion", "Lunaria", "Miralion", "Peridia", "Serenion", "Timia", "Veradion",
-		"Zerona"];
+   constructor(
+      private _year: number,
+      private _season: number,
+      private _week: number,
+      private _day: number
+   ) {}
 
-	public constructor(
-		public readonly year: number,
-		public readonly month: number,
-		public readonly date: number,
-		public readonly degree: number,
-		public readonly minute: number,
-		public readonly second: number
-	) {}
+   public get year(): number {
+      return this._year;
+   }
 
-	get monthName(): string {
-		return SilicanDate.MonthNames[this.month];
-	}
+   public get season(): number {
+      return this._season;
+   }
 
-	public static fromGregorian(original: Date): SilicanDate {
-		let utcts = Date.UTC(original.getUTCFullYear(), original.getUTCMonth(), original.getUTCDate(), 0, 0, 0, 0);
-		let daysDifference = (utcts - SilicanDate.SyncPoint) / (24 * 60 * 60 * 1000);
-		let year: number = null;
-		let dayInYear: number = null;
-		let month: number = null;
-		let date: number = null;
-		if (daysDifference >= 0) {
-			year = 12018;
-			while (daysDifference > 364) {
-				year += 1;
-				if (SilicanDate.isLeapLear(year)) {
-					daysDifference -= 371
-				} else {
-					daysDifference -= 364;
-				}
-			}
-			dayInYear = daysDifference;
-		} else {
-			year = 12017;
-			while (daysDifference < -364) {
-				year -= 1;
-				if (SilicanDate.isLeapLear(year)) {
-					daysDifference += 371;
-				} else {
-					daysDifference += 364;
-				}
-			}
-			dayInYear = daysDifference + 364;
-		}
-		month = Math.floor(dayInYear / 28) + 1;
-		date = dayInYear % 28 + 1;
+   public get week(): number {
+      return this._week;
+   }
 
-		if (month === 14) {
-			month = 13;
-			date += 28;
-		}
+   public get day(): number {
+      return this._day;
+   }
 
-		// Time
-		let degrees = (original.getUTCMinutes() + original.getUTCHours() * 60 +
-			original.getUTCSeconds() / 60 + original.getUTCMilliseconds() / 60000) / 4;
-		let degree = Math.floor(degrees);
-		let minutes = (degrees - degree) * 60;
-		let minute = Math.floor(minutes);
-		let seconds = (minutes - minute) * 60;
-		return new SilicanDate(year, month, date, degree, minute, seconds);
-	}
+   public format(): string {
+      return `${this.year}/${this.season}/${this.week}/${this.day}`;
+   }
 
-	public static isLeapLear(year: number): boolean {
-		return year % 5 === 0 && (year % 400 === 0 || year % 40 !== 0);
-	}
+   public static from(date: Date): SilicanDate {
+      const difference = Math.floor((date.getTime() - syncPoint) / (1000 * 60 * 60 * 24));
+      const dayNumber = syncDayNumber + difference;
+      const years400 = Math.floor(dayNumber / daysIn400Years);
+      const remain400 = dayNumber % daysIn400Years;
+      const years40 = Math.floor(remain400 / daysIn40Years);
+      const remain40 = remain400 % daysIn40Years;
+      const years5 = Math.floor(remain40 / daysIn5Years);
+      const remain5 = remain40 % daysIn5Years;
+      const remainingYears = Math.floor(remain5 / 364);
+      const remainingDays = remain5 % 364;
+      const year =
+         years400 * 400 +
+         years40 * 40 +
+         years5 * 5 +
+         Math.min(remainingYears, 5) +
+         1;
+      const dayOfYear =
+         remainingYears === 6 ? 364 + remainingDays : remainingDays;
+      const season = Math.floor(dayOfYear / 91) + 1;
+      const dayInSeason = dayOfYear % 91;
+      const week = season === 4 ? 13 : Math.floor(dayInSeason / 7) + 1;
+      const day = (dayOfYear % 7) + 1;
+      return new SilicanDate(year, season, week, day);
+   }
+
+   public static today(): SilicanDate {
+      return SilicanDate.from(new Date());
+   }
 }
