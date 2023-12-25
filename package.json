@@ -1,8 +1,8 @@
 {
-  "name": "@5am-works/silican-date",
+  "name": "@5am-works/programmettas",
   "version": "0.1.0",
-  "description": "Reference library for Silican dates",
-  "main": "silican.ts",
+  "description": "Collection of small programs",
+  "main": "index.ts",
   "scripts": {
     "test": "jest"
   },
