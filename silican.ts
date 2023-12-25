@@ -1,10 +1,10 @@
-const syncPoint = Date.UTC(2018, 0, 1);
+const syncPoint = Date.UTC(2001, 0, 1);
 const syncDayNumber =
-   12017 * 364 +
+   12000 * 364 +
    7 *
-   (Math.floor(12017 / 5) -
-      Math.floor(12017 / 40) +
-      Math.floor(12017 / 400));
+   (Math.floor(12000 / 5) -
+      Math.floor(12000 / 40) +
+      Math.floor(12000 / 400));
 const daysIn400Years = 400 * 364 + 7 * (400 / 5 - 400 / 40 + 1);
 const daysIn40Years = 40 * 364 + 7 * (40 / 5 - 1);
 const daysIn5Years = 5 * 364 + 7;
@@ -47,20 +47,19 @@ export class SilicanDate {
       const years5 = Math.floor(remain40 / daysIn5Years);
       const remain5 = remain40 % daysIn5Years;
       const remainingYears = Math.floor(remain5 / 364);
+      const isLeapYear = years40 === 10 || remainingYears === 5;
       const remainingDays = remain5 % 364;
       const year =
          years400 * 400 +
          years40 * 40 +
          years5 * 5 +
-         Math.min(remainingYears, 5) +
-         1;
-      const dayOfYear =
-         remainingYears === 6 ? 364 + remainingDays : remainingDays;
+         Math.min(remainingYears, 4) + (isLeapYear ? 0 : 1);
+      const dayOfYear = isLeapYear ? 364 + remainingDays : remainingDays;
       const season = Math.floor(dayOfYear / 91) + 1;
       const dayInSeason = dayOfYear % 91;
-      const week = season === 5 ? 13 : Math.floor(dayInSeason / 7) + 1;
+      const week = season === 5 ? 14 : Math.floor(dayInSeason / 7) + 1;
       const day = (dayOfYear % 7) + 1;
-      return new SilicanDate(year, season, week, day);
+      return new SilicanDate(year, Math.min(4, season), week, day);
    }
 
    public static today(): SilicanDate {
